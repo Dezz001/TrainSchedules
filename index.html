@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en-us">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Train Schedules | Darrin Davis</title>
+
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+	<!-- External Asset Stylesheets -->
+	<!-- <link rel="stylesheet" type="text/css" href="assets/css/reset.css"> -->
+	<link rel="stylesheet" type="text/css" href="assets/css/style.css">
+
+	<!-- jQuery 1.x -->
+	<script
+	  src="https://code.jquery.com/jquery-1.12.4.js"
+	  integrity="sha256-Qw82+bXyGq6MydymqBxNPYTaUXXq7c8v3CwiYwLLNXU="
+	  crossorigin="anonymous">
+	</script>
+
+	<!-- Latest compiled and minified JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous">
+	</script>
+
+	<!-- AJAX -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <!-- Firebase JavaScript Link -->
+    <script src="https://www.gstatic.com/firebasejs/live/3.0/firebase.js"></script>
+
+	<!-- Added Moment JS -->
+	<script src="https://cdn.jsdelivr.net/momentjs/2.12.0/moment.min.js"></script>
+
+</head>
+
+
+<body>
+
+<!-- Header -->
+<Div class="panel-body">
+
+	<h1>Dezz Railways Train Schedule</h1>
+
+</Div>
+
+
+<!-- Train Schedule Output Table -->
+<div class="panel-body">
+
+	<h3>Current Train Schedule</h3>
+
+	<div class="col-sm-2">
+		<div class="form-group">
+			<label id="trainNameP" for="trainName">Train Name</label>
+		</div>
+	</div>
+
+	<div class="col-sm-2">
+		<div class="form-group">
+			<label id="destinationP" for="destination">Destination</label>
+		</div>
+	</div>
+
+	<div class="col-sm-2">
+		<div class="form-group">
+			<label id="nextArrivalP" for="nextArrival">Next Arrival</label>
+		</div>
+	</div>
+
+	<div class="col-sm-2">
+		<div class="form-group">
+			<label id="frequencyP" for="frequency">Frequency</label>
+		</div>
+	</div>
+
+	<div class="col-sm-3">
+		<div class="form-group">
+			<label id="minutesAwayP" for="minutesAway">Minutes Away</label>
+		</div>
+	</div>
+
+</div>
+
+
+<!-- Train Schedule Input and Submit Form  -->
+<div class="panel-body">
+	<h3>Add a Train</h3>
+
+	<form class="form" id="addTrain-form">
+		
+		<div class="form-group">
+			<label for="trainName">Train Name:</label>
+			<input type="text" class="form-control" id="trainName-input">
+		</div>
+
+		<div class="form-group">
+			<label for="destination">Destination:</label>
+			<input type="text" class="form-control" id="destination-input">
+		</div>
+
+		<div class="form-group">
+			<label for="firstTrainTime">First Train Time (HH:mm - military time):</label>
+			<input type="time" class="form-control" id="firstTrainTime-input">
+		</div>
+
+		<div class="form-group">
+			<label for="frequency">Frequency (min):</label>
+			<input type="number" class="form-control" id="frequency-input">
+		</div>
+
+		<button type="submit" class="btn btn-primary" id="submit-button">Submit</button>
+
+	</form>
+
+</div>
+
+
+
+	
+<script>
+
+// Initialize Firebase
+var config = {
+	apiKey: "AIzaSyACnaljb1jAtPYBQiNBUBEnrefsBgt_xLc",
+	authDomain: "new-test-1-3aae1.firebaseapp.com",
+	databaseURL: "https://new-test-1-3aae1.firebaseio.com",
+	projectId: "new-test-1-3aae1",
+	storageBucket: "new-test-1-3aae1.appspot.com",
+	messagingSenderId: "362706371575"
+};
+
+firebase.initializeApp(config);
+
+// Creating Database Reference
+var databaseReference = firebase.database();
+
+
+
+// Global Input Variables	
+var trainName = "";
+var destination = "";
+var firstTrainTime = 0;
+var frequency = 0;
+
+
+// Global Variables - Posting
+var trainNameP = "";
+var destinationP = "";
+var nextArrivalP = 0; //let local calculate
+var frequencyP = 0; //let local calculate
+var minutesAwayP = 0; //let local calculate
+
+
+
+
+
+// Submits Form Information
+$("#submit-button").on("click", function() {
+
+	// Form Information
+	trainName = $("#trainName-input").val().trim();
+	destination = $("#destination-input").val().trim();
+	firstTrainTime = $("#firstTrainTime-input").val().trim();
+	frequency = $("#frequency-input").val().trim();
+
+
+	// Database conncted variables
+	databaseReference.ref().set({
+		trainName: trainName,
+		destination: destination,
+		frequency: frequency,
+		nextArrivalTime: nextArrivalTime,
+		minutesUntilTrainArrive: minutesUntilTrainArrive
+	});
+
+
+	// Calculations
+	var currentTime = moment();
+	console.log("Current Time: " + moment(currentTime).format("hh:mm"));
+
+	var firstTrainTimeConverted = moment(firstTrainTime, "hh:mm").subtract(1, "years");
+	console.log("Converting First Train's Time: " + firstTrainTimeConverted);
+
+	var timeDifference = moment().diff(moment(firstTrainTimeConverted), "minutes");
+	console.log("Difference in Time: " + timeDifference);
+
+	var remainingTime = timeDifference % frequency;
+	console.log("Remaining Time: " + remainingTime);
+
+	var minutesUntilTrainArrive = frequency - remainingTime;
+	console.log("Minutes Till Next Train: " + minutesUntilTrainArrive);
+
+	var nextArrivalTime = moment().add(minutesUntilTrainArrive, "minutes");
+	console.log("Arrival Time: " + moment(nextArrivalTime).format("hh:mm"));
+
+
+
+});
+
+
+// Firebase Watcher
+databaseReference.ref().on("value", function(snapshot) {
+
+	var remoteData = snapshot.val();
+
+	console.log(remoteData);
+	console.log(remoteData.trainName);
+	console.log(remoteData.destination);
+	console.log(remoteData.firstTrainTime);
+	console.log(remoteData.frequency);
+
+
+	// Display to HTML
+	$("#trainNameP").text(remoteData.trainName);
+	$("#destinationP").text(remoteData.destination);
+	$("#frequencyP").text(remoteData.frequency);
+	$("#nextArrivalTimeP").text(remoteData.nextArrivalTime);
+	$("#minutesUntilTrainArriveP").text(remoteData.minutesUntilTrainArrive);
+	
+	},
+
+	// Handle Errors
+	function (errorObject) {
+		console.log("Errors Handled: " + errorObject.code);
+	}
+);
+
+
+
+</script>	
+
+
+
+<!-- 	Java Code from game.js -->
+<!-- <script src="assets/javascript/app.js"></script> -->
+
+</body>
+
+</html>
