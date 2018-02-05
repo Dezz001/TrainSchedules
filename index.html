@@ -28,7 +28,7 @@
 
     <!-- Firebase JavaScript Link -->
     <script src="https://www.gstatic.com/firebasejs/live/3.0/firebase.js"></script>
-
+  
 	<!-- Added Moment JS -->
 	<script src="https://cdn.jsdelivr.net/momentjs/2.12.0/moment.min.js"></script>
 
@@ -50,7 +50,21 @@
 
 	<h3>Current Train Schedule</h3>
 
-	<div class="col-sm-2">
+	<table class="table" id="newTrainSchedule">
+		<thead>
+			<tr>
+				<th>Train Name</th>
+				<th>Destination</th>
+				<th>Frequency (minutes)</th>
+				<th>Next Arrival</th>
+				<th>Minutes Away</th>
+			</tr>
+		</thead>
+		<tbody></tbody>
+		
+	</table>
+
+<!-- 	<div class="col-sm-2">
 		<div class="form-group">
 			<label id="trainNameP" for="trainName">Train Name</label>
 		</div>
@@ -78,7 +92,7 @@
 		<div class="form-group">
 			<label id="minutesAwayP" for="minutesAway">Minutes Away</label>
 		</div>
-	</div>
+	</div> -->
 
 </div>
 
@@ -90,22 +104,22 @@
 	<form class="form" id="addTrain-form">
 		
 		<div class="form-group">
-			<label for="trainName">Train Name:</label>
+			<label for="trainName">Train Name</label>
 			<input type="text" class="form-control" id="trainName-input">
 		</div>
 
 		<div class="form-group">
-			<label for="destination">Destination:</label>
+			<label for="destination">Destination</label>
 			<input type="text" class="form-control" id="destination-input">
 		</div>
 
-		<div class="form-group">
-			<label for="firstTrainTime">First Train Time (HH:mm - military time):</label>
+		<div class="form-group">	
+			<label for="firstTrainTime">First Train Time (hh:mm)</label>
 			<input type="time" class="form-control" id="firstTrainTime-input">
 		</div>
 
 		<div class="form-group">
-			<label for="frequency">Frequency (min):</label>
+			<label for="frequency">Frequency (min)</label>
 			<input type="number" class="form-control" id="frequency-input">
 		</div>
 
@@ -137,49 +151,71 @@ var databaseReference = firebase.database();
 
 
 
-// Global Input Variables	
+// // Global Input Variables	
 var trainName = "";
 var destination = "";
 var firstTrainTime = 0;
 var frequency = 0;
 
 
-// Global Variables - Posting
-var trainNameP = "";
-var destinationP = "";
-var nextArrivalP = 0; //let local calculate
-var frequencyP = 0; //let local calculate
-var minutesAwayP = 0; //let local calculate
-
-
-
-
-
 // Submits Form Information
 $("#submit-button").on("click", function() {
 
-	// Form Information
-	trainName = $("#trainName-input").val().trim();
-	destination = $("#destination-input").val().trim();
-	firstTrainTime = $("#firstTrainTime-input").val().trim();
-	frequency = $("#frequency-input").val().trim();
+	// Prevents page refresh
+	event.preventDefault();	
 
+	// Form Information
+	var trainName = $("#trainName-input").val().trim();
+	var destination = $("#destination-input").val().trim();
+	var firstTrainTime = $("#firstTrainTime-input").val().trim();
+	var frequency = $("#frequency-input").val().trim();
+
+	// Clears form input fields for next entry
+	$("#trainName-input").val("");
+	$("#destination-input").val("");
+	$("#firstTrainTime-input").val("");
+	$("#frequency-input").val("");
+
+	console.log(trainName);
+	console.log(destination);
+	console.log(firstTrainTime);
+	console.log(frequency);
 
 	// Database conncted variables
-	databaseReference.ref().set({
+	// databaseReference.ref().set({
+	databaseReference.ref().push({
 		trainName: trainName,
 		destination: destination,
+		firstTrainTime: firstTrainTime,
 		frequency: frequency,
-		nextArrivalTime: nextArrivalTime,
-		minutesUntilTrainArrive: minutesUntilTrainArrive
 	});
 
+	return false;
 
-	// Calculations
+});
+
+
+// Firebase Watcher
+databaseReference.ref().on("child_added", function(snapshot) {
+
+	var remoteData = snapshot.val();
+
+	console.log(remoteData);
+	console.log(remoteData.trainName);
+	console.log(remoteData.destination);
+	console.log(remoteData.firstTrainTime);
+	console.log(remoteData.frequency);
+
+	trainName = remoteData.trainName;
+	destination = remoteData.destination;
+	firstTrainTime = remoteData.firstTrainTime;
+	frequency = remoteData.frequency;
+	
+	// Calculations and testing
 	var currentTime = moment();
-	console.log("Current Time: " + moment(currentTime).format("hh:mm"));
+	console.log("Current Time: " + moment(currentTime).format("HH:mm"));
 
-	var firstTrainTimeConverted = moment(firstTrainTime, "hh:mm").subtract(1, "years");
+	var firstTrainTimeConverted = moment(firstTrainTime, "HH:mm").subtract(1, "years");
 	console.log("Converting First Train's Time: " + firstTrainTimeConverted);
 
 	var timeDifference = moment().diff(moment(firstTrainTimeConverted), "minutes");
@@ -194,38 +230,57 @@ $("#submit-button").on("click", function() {
 	var nextArrivalTime = moment().add(minutesUntilTrainArrive, "minutes");
 	console.log("Arrival Time: " + moment(nextArrivalTime).format("hh:mm"));
 
+	var nextArrivalTimeMilitary = nextArrivalTime.format("HH:mm");
 
+	// Table setup and build
+	// var tr = $("<tr>");
+	// var trainNameP = $("<td>");
+	// var destinationP = $("<td>");
+	// var frequencyP = $("<td>");
+	// var nextArrivalTimeP = $("<td>");
+	// var minutesUntilTrainArriveP = $("<td>");
 
-});
+	// trainNameP.append(trainName);
+	// destinationP.append(destination);
+	// frequencyP.append(frequency);
+	// nextArrivalTimeP.append(nextArrivalTime);
+	// minutesUntilTrainArriveP.append(minutesUntilTrainArrive);
 
+	// tr.append(trainNameP).append(destinationP).append(frequencyP).append(nextArrivalTimeP).append(minutesUntilTrainArriveP);
 
-// Firebase Watcher
-databaseReference.ref().on("value", function(snapshot) {
-
-	var remoteData = snapshot.val();
-
-	console.log(remoteData);
-	console.log(remoteData.trainName);
-	console.log(remoteData.destination);
-	console.log(remoteData.firstTrainTime);
-	console.log(remoteData.frequency);
-
+	// $("newTrainSchedule");
+	// console.log("New Train Schedule: " + newTrainSchedule);
 
 	// Display to HTML
-	$("#trainNameP").text(remoteData.trainName);
-	$("#destinationP").text(remoteData.destination);
-	$("#frequencyP").text(remoteData.frequency);
-	$("#nextArrivalTimeP").text(remoteData.nextArrivalTime);
-	$("#minutesUntilTrainArriveP").text(remoteData.minutesUntilTrainArrive);
+	// $("#trainNameP").text(remoteData.trainName);
+	// $("#destinationP").text(remoteData.destination);
+	// $("#frequencyP").text(remoteData.frequency);
+	// $("#nextArrivalTimeP").text(remoteData.nextArrivalTime);
+	// $("#minutesUntilTrainArriveP").text(remoteData.minutesUntilTrainArrive);
+
+	// $("#newTrainSchedule").text(newTrainSchedule);
+
+
+	  // Add each train's data into the table
+	$("#newTrainSchedule > tbody").append("<tr><td>" + trainName + "</td><td>" + destination + "</td><td>" + frequency + "</td><td>" + nextArrivalTimeMilitary + "</td><td>" + minutesUntilTrainArrive + "</td></tr>");
 	
+
+
+	// // Global Variables - Posting
+	// var trainNameP = "";
+	// var destinationP = "";
+	// var nextArrivalP = 0; //let local calculate
+	// var frequencyP = 0; //let local calculate
+	// var minutesAwayP = 0; //let local calculate
+
 	},
 
 	// Handle Errors
 	function (errorObject) {
 		console.log("Errors Handled: " + errorObject.code);
 	}
-);
 
+);
 
 
 </script>	
