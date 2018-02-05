@@ -38,9 +38,9 @@
 <body>
 
 <!-- Header -->
-<Div class="panel-body">
+<Div class="jumbotron">
 
-	<h1>Dezz Railways Train Schedule</h1>
+	<h1 class="text-center">Dezz Railways Train Schedule</h1>
 
 </Div>
 
@@ -63,36 +63,6 @@
 		<tbody></tbody>
 		
 	</table>
-
-<!-- 	<div class="col-sm-2">
-		<div class="form-group">
-			<label id="trainNameP" for="trainName">Train Name</label>
-		</div>
-	</div>
-
-	<div class="col-sm-2">
-		<div class="form-group">
-			<label id="destinationP" for="destination">Destination</label>
-		</div>
-	</div>
-
-	<div class="col-sm-2">
-		<div class="form-group">
-			<label id="nextArrivalP" for="nextArrival">Next Arrival</label>
-		</div>
-	</div>
-
-	<div class="col-sm-2">
-		<div class="form-group">
-			<label id="frequencyP" for="frequency">Frequency</label>
-		</div>
-	</div>
-
-	<div class="col-sm-3">
-		<div class="form-group">
-			<label id="minutesAwayP" for="minutesAway">Minutes Away</label>
-		</div>
-	</div> -->
 
 </div>
 
@@ -129,12 +99,10 @@
 
 </div>
 
-
-
 	
 <script>
 
-// Initialize Firebase
+// Initialize Firebase and set Credentials
 var config = {
 	apiKey: "AIzaSyACnaljb1jAtPYBQiNBUBEnrefsBgt_xLc",
 	authDomain: "new-test-1-3aae1.firebaseapp.com",
@@ -150,7 +118,6 @@ firebase.initializeApp(config);
 var databaseReference = firebase.database();
 
 
-
 // // Global Input Variables	
 var trainName = "";
 var destination = "";
@@ -164,7 +131,7 @@ $("#submit-button").on("click", function() {
 	// Prevents page refresh
 	event.preventDefault();	
 
-	// Form Information
+	// Form Information applied to the global variables
 	var trainName = $("#trainName-input").val().trim();
 	var destination = $("#destination-input").val().trim();
 	var firstTrainTime = $("#firstTrainTime-input").val().trim();
@@ -176,12 +143,13 @@ $("#submit-button").on("click", function() {
 	$("#firstTrainTime-input").val("");
 	$("#frequency-input").val("");
 
+	// Testing and Debugging
 	console.log(trainName);
 	console.log(destination);
 	console.log(firstTrainTime);
 	console.log(frequency);
 
-	// Database conncted variables
+	// Firebase database conncted variables
 	// databaseReference.ref().set({
 	databaseReference.ref().push({
 		trainName: trainName,
@@ -195,11 +163,13 @@ $("#submit-button").on("click", function() {
 });
 
 
-// Firebase Watcher
+// Firebase
 databaseReference.ref().on("child_added", function(snapshot) {
 
+	//Kevin strongly suggested setting the snapshot to a variable, it will make coding for firebase easier in the long run
 	var remoteData = snapshot.val();
 
+	// Testing and Debugging
 	console.log(remoteData);
 	console.log(remoteData.trainName);
 	console.log(remoteData.destination);
@@ -232,63 +202,24 @@ databaseReference.ref().on("child_added", function(snapshot) {
 
 	var nextArrivalTimeMilitary = nextArrivalTime.format("HH:mm");
 
-	// Table setup and build
-	// var tr = $("<tr>");
-	// var trainNameP = $("<td>");
-	// var destinationP = $("<td>");
-	// var frequencyP = $("<td>");
-	// var nextArrivalTimeP = $("<td>");
-	// var minutesUntilTrainArriveP = $("<td>");
-
-	// trainNameP.append(trainName);
-	// destinationP.append(destination);
-	// frequencyP.append(frequency);
-	// nextArrivalTimeP.append(nextArrivalTime);
-	// minutesUntilTrainArriveP.append(minutesUntilTrainArrive);
-
-	// tr.append(trainNameP).append(destinationP).append(frequencyP).append(nextArrivalTimeP).append(minutesUntilTrainArriveP);
-
-	// $("newTrainSchedule");
-	// console.log("New Train Schedule: " + newTrainSchedule);
-
-	// Display to HTML
-	// $("#trainNameP").text(remoteData.trainName);
-	// $("#destinationP").text(remoteData.destination);
-	// $("#frequencyP").text(remoteData.frequency);
-	// $("#nextArrivalTimeP").text(remoteData.nextArrivalTime);
-	// $("#minutesUntilTrainArriveP").text(remoteData.minutesUntilTrainArrive);
-
-	// $("#newTrainSchedule").text(newTrainSchedule);
-
-
-	  // Add each train's data into the table
+	  // Add each train's data into the HTML table
 	$("#newTrainSchedule > tbody").append("<tr><td>" + trainName + "</td><td>" + destination + "</td><td>" + frequency + "</td><td>" + nextArrivalTimeMilitary + "</td><td>" + minutesUntilTrainArrive + "</td></tr>");
 	
-
-
-	// // Global Variables - Posting
-	// var trainNameP = "";
-	// var destinationP = "";
-	// var nextArrivalP = 0; //let local calculate
-	// var frequencyP = 0; //let local calculate
-	// var minutesAwayP = 0; //let local calculate
-
 	},
 
-	// Handle Errors
+	// Address Errors
 	function (errorObject) {
 		console.log("Errors Handled: " + errorObject.code);
 	}
 
 );
 
-
 </script>	
-
 
 
 <!-- 	Java Code from game.js -->
 <!-- <script src="assets/javascript/app.js"></script> -->
+
 
 </body>
 
